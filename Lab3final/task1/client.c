@@ -31,7 +31,7 @@ void *get_in_addr(struct sockaddr *sa)
 int main(int argc, char *argv[])
 {
 	int sockfd, numbytes;  
-	char buf[MAXDATASIZE];
+	char buf[MAXDATASIZE],inputChar[MAXDATASIZE];
 	struct addrinfo hints, *servinfo, *p;
 	int rv;
 	char s[INET6_ADDRSTRLEN];
@@ -78,16 +78,33 @@ int main(int argc, char *argv[])
 
 	freeaddrinfo(servinfo); // all done with this structure
 
-	if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
-	    perror("recv");
-	    exit(1);
+	while(1) {
+		int i = 0,c =0;
+		while ((c = getchar()) != '\n' && c != EOF) {
+			inputChar[i] = c;
+			i++;
+    	}// Getinput from user
+
+		printf("\nI typed %s \n", inputChar);
+		if (send(sockfd, inputChar, MAXDATASIZE-1, 0) == -1)
+					perror("send");
+
+		memset(inputChar,0,sizeof(inputChar)); // clear string buffer
+		i = 0;
+		if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) 
+			perror("recv");
+
+		buf[numbytes] = '\0';
+		printf("client: received '%s'\n",buf);
+
+		if(strcmp(buf,"q") == 0)	
+			exit(1);
 	}
 
-	buf[numbytes] = '\0';
 
-	printf("client: received '%s'\n",buf);
 
 	close(sockfd);
+	
 
 	return 0;
 }
