@@ -53,6 +53,7 @@ int main(void)
 	int yes=1;
 	char s[INET6_ADDRSTRLEN] ,buf[MAXDATASIZE],buf1[MAXDATASIZE];
 	int rv, numbytes;
+	FILE *fp;
 
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;
@@ -165,38 +166,44 @@ int main(void)
 					}
 				}
 				if(!strcmp(buf, "p")){
-					FILE *fp;
-					if ((numbytes = recv(new_fd, buf1, MAXDATASIZE-1, 0)) == -1) 
+					
+					if ((numbytes = recv(new_fd, buf, MAXDATASIZE-1, 0)) == -1) 
 						perror("recv");
 					buf[numbytes] = '\0';
 
-					int result = access(buf1, R_OK); //if exist =0, else -1
+					if(!strcmp(buf,"file.txt")) printf("DEBUG11\n");
+
+					int result = access(buf, R_OK); //if exist =0, else -1
 
 					if(result == 0) {
+					
 						/*fp = fopen(buf, "r");
-						fp = fopen(buf, "r");
-						fscanf(fp, "%s", buf1);
+						if (fp == NULL) printf("DEBUG12\n");
+						int i = 0,ch =0;
+						while((ch = fgetc(fp)) != EOF) {
+							buf1[i] = ch;
+							i++;
+						}
+						buf1[i] = '\0';
+						i = 0;
+
+						printf("buf1: %s\n", buf1);
 						if (send(new_fd, buf1, MAXDATASIZE-1, 0) == -1)
 							perror("send");*/
 						if (fork() == 0) {
 							
 							dup2(new_fd, 1);
-							execl("/usr/bin/cat", "cat", buf1 ,(char *) NULL);
+							execl("/usr/bin/cat", "cat", buf ,(char *) NULL);
 							exit(0);
 						}
 						//fclose(fp);
 						
 					}
-
 					else {
 						if (send(new_fd, "no", MAXDATASIZE-1, 0) == -1)
 							perror("send");
 					}
 
-				}
-				if(!strcmp(buf, "d")){
-					 //RX PATH NAME
-					//D COMMANDS DOES NOT WORK
 				}
 
 				printf("RX from client %s %c %d\n", buf, buf[0], numbytes);

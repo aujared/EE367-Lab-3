@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
 			int ack;
 			if (send(sockfd, "c", MAXDATASIZE-1, 0) == -1)
 				perror("send");
-			printf("What file would you like to check for?:\n ");
+			printf("What file would you like to check for?:\n");
 			scanf("%s", &filename);
 			while (getchar() != '\n') continue;
 
@@ -126,38 +126,72 @@ int main(int argc, char *argv[])
 		}
 		
 		else if(inputChar[0] == 'p' || inputChar[0] == 'P'){
-			int filesize;
-			char sizeoffile[20] = {0};
 
 			if (send(sockfd, "p", MAXDATASIZE-1, 0) == -1)
 				perror("send");
 
-			printf("What file would you like to print out?:\n ");
+			printf("What file would you like to print out?:\n");
 			scanf("%s", &filename);
 			while (getchar() != '\n') continue;
+
 			send(sockfd, filename, MAXDATASIZE-1,0);
 			numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0);
 			buf[numbytes] = '\0';
-			/*filesize = (int) strtol(sizeoffile, (char **) NULL, 10); 
-			printf("Size file: %d \n", filesize);*/
-			if(strcmp(buf,"no")){
+
+			if(!strcmp(buf,"no")){
 				printf("File not found");
-				//continue;
+
 			}
 			else{
-				/*char *filebuff = calloc(filesize + 1, sizeof(char));
-                sleep(1);
-                numbytes = recv(sockfd, filebuff, filesize, 0); 
-                printf("contents : \n%s", filebuff);*/
-				
 				printf("Recived\n %s", buf);
 			}
 
 		}
 		else if(inputChar[0] == 'd' || inputChar[0] == 'D'){
-				if (send(sockfd, "d", MAXDATASIZE-1, 0) == -1)
+			if (send(sockfd, "p", MAXDATASIZE-1, 0) == -1)
 				perror("send");
-			
+
+			printf("What file would you like to Download?:\n");
+			scanf("%s", &filename);
+			while (getchar() != '\n') continue;
+
+			send(sockfd, filename, MAXDATASIZE-1,0);
+			numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0);
+			buf[numbytes] = '\0';
+
+			if(!strcmp(buf,"no")){
+				printf("File not found");
+
+			}
+			else{
+				//printf("Recived\n %s", buf);
+
+				printf("File Downloaded from Server\n");
+				printf("Save as: "); //client side filename
+				scanf("%s", &inputChar);
+				while (getchar() != '\n') continue;
+
+				//download file from server
+				FILE *fp;
+				fp = fopen(inputChar, "r");
+				if(fp != NULL){
+					char choice[5];
+					printf("File %s exists. Do you want to override? (y/n): ", filename);
+					scanf("%4s", &choice);
+					if(choice[0] == 'n'){
+						fclose(fp);
+						continue;
+				}
+				//Write file
+				fp = fopen(inputChar, "w");
+				if(NULL == fp){
+					printf("Error Opening File");
+					return 1;
+				}
+				fwrite(buf, 1, sizeof(buf), fp);
+				fclose(fp);
+				}
+			}
 		
 		}
 
@@ -170,20 +204,9 @@ int main(int argc, char *argv[])
 			printHelpMenu();
 		}
 
-		//if (send(sockfd, inputChar, MAXDATASIZE-1, 0) == -1)
-		//			perror("send");
-
 		memset(inputChar,0,sizeof(inputChar)); // clear string buffer
 		i = 0;
 		
-		/*if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) 
-			perror("recv");
-
-		buf[numbytes] = '\0';
-
-		#ifdef DEBUG
-		printf("client: received '%s'\n",buf);
-		#endif*/
 	}
 
 	close(sockfd);
@@ -191,7 +214,7 @@ int main(int argc, char *argv[])
 }
 
 void printMenu() {
-	printf("Main Menu\n");
+	printf("\n\nMain Menu\n");
 	printf("ALL COMMAND ARE SINGLE TEXT CHARACTER\n");
 	printf("------------------------------------------------------------------------------\n");
 	printf("l: List \n");
@@ -205,7 +228,7 @@ void printMenu() {
 }
 
 void printHelpMenu() {
-	printf("h: Help: List of all command\n");
+	printf("\n\nh: Help: List of all command\n");
 	printf("	l: List: List the contents of the directory of the server\n");
 	printf("	c: Check <file name>: Check if the server has the file named <file name>. \n");
 	printf("	p: Display <file name>: Check if the server has the file named <file name>.\n");
