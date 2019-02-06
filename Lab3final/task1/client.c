@@ -84,13 +84,16 @@ int main(int argc, char *argv[])
 			inputChar[i] = c;
 			i++;
     	}// Getinput from user
+		inputChar[i] = '\0';
 
 		printf("\nI typed %s \n", inputChar);
+
 		if (send(sockfd, inputChar, MAXDATASIZE-1, 0) == -1)
 					perror("send");
 
 		memset(inputChar,0,sizeof(inputChar)); // clear string buffer
 		i = 0;
+		
 		if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) 
 			perror("recv");
 

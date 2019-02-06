@@ -16,8 +16,9 @@
 #include <signal.h>
 
 #define PORT "3500"  // the port users will be connecting to
-#define MAXDATASIZE 100 // max number of bytes we can get at once 
+
 #define BACKLOG 10	 // how many pending connections queue will hold
+#define MAXDATASIZE 100 // max number of bytes we can get at once 
 
 void sigchld_handler(int s)
 {
@@ -50,8 +51,8 @@ int main(void)
 	socklen_t sin_size;
 	struct sigaction sa;
 	int yes=1;
-	char s[INET6_ADDRSTRLEN];
-	int rv;
+	char s[INET6_ADDRSTRLEN] ,buf[MAXDATASIZE];
+	int rv, numbytes;
 
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;
@@ -124,27 +125,21 @@ int main(void)
 		if (!fork()) { // this is the child process
 			close(sockfd); // child doesn't need the listener
 
-			char buf[MAXDATASIZE];
-			int numbytes = 0;
 			while(1) {
-				if ((numbytes = recv(new_fd, buf, MAXDATASIZE-1, 0)) == -1) {
+				if ((numbytes = recv(new_fd, buf, MAXDATASIZE-1, 0)) == -1) 
 					perror("recv");
-					exit(1);
-				}// RX from client
+
 				buf[numbytes] = '\0';
-				printf("I rxed %s \n, its is %d long\n", buf, numbytes);
-				if (send(new_fd, buf, MAXDATASIZE -1, 0) == -1)
-					perror("send"); //Repeat what client typed
-					
-				//close(new_fd);	Don't close connection yet
-				if (strcmp(buf,"q") == 0){
-					exit(0);
+
+				if (send(new_fd, buf, MAXDATASIZE-1, 0) == -1)
+					perror("send");
+
+				if(buf[0] == 'q'){
 					close(new_fd);
-				} 
+					exit(0);
+				}
 			}
 		}
-		
-
 		close(new_fd);  // parent doesn't need this
 	}
 
