@@ -51,7 +51,7 @@ int main(void)
 	socklen_t sin_size;
 	struct sigaction sa;
 	int yes=1;
-	char s[INET6_ADDRSTRLEN] ,buf[MAXDATASIZE];
+	char s[INET6_ADDRSTRLEN] ,buf[MAXDATASIZE],buf1[MAXDATASIZE];
 	int rv, numbytes;
 
 	memset(&hints, 0, sizeof hints);
@@ -151,6 +151,7 @@ int main(void)
 				if(!strcmp(buf, "c")) {
 					if ((numbytes = recv(new_fd, buf, MAXDATASIZE-1, 0)) == -1) 
 						perror("recv");
+					buf[numbytes] = '\0';
 
 					int result = access(buf, R_OK); //if exist =0, else -1
 
@@ -164,19 +165,29 @@ int main(void)
 					}
 				}
 				if(!strcmp(buf, "p")){
-					if ((numbytes = recv(new_fd, buf, MAXDATASIZE-1, 0)) == -1) 
+					FILE *fp;
+					if ((numbytes = recv(new_fd, buf1, MAXDATASIZE-1, 0)) == -1) 
 						perror("recv");
+					buf[numbytes] = '\0';
 
-					int result = access(buf, R_OK); //if exist =0, else -1
+					int result = access(buf1, R_OK); //if exist =0, else -1
 
 					if(result == 0) {
+						/*fp = fopen(buf, "r");
+						fp = fopen(buf, "r");
+						fscanf(fp, "%s", buf1);
+						if (send(new_fd, buf1, MAXDATASIZE-1, 0) == -1)
+							perror("send");*/
 						if (fork() == 0) {
+							
 							dup2(new_fd, 1);
-							execl("/usr/bin/cat", "cat", buf,(char *) NULL);
+							execl("/usr/bin/cat", "cat", buf1 ,(char *) NULL);
 							exit(0);
 						}
-						wait(NULL);
+						//fclose(fp);
+						
 					}
+
 					else {
 						if (send(new_fd, "no", MAXDATASIZE-1, 0) == -1)
 							perror("send");

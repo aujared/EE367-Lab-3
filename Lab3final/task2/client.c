@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
 			scanf("%s", &filename);
 			while (getchar() != '\n') continue;
 
-			send(sockfd, buf, MAXDATASIZE -1, 0);
+			send(sockfd, filename, MAXDATASIZE -1, 0);
 			ack = recv(sockfd, buf, MAXDATASIZE - 1, 0);
             buf[ack] = '\0';
 
@@ -136,18 +136,21 @@ int main(int argc, char *argv[])
 			scanf("%s", &filename);
 			while (getchar() != '\n') continue;
 			send(sockfd, filename, MAXDATASIZE-1,0);
-			numbytes = recv(sockfd, sizeoffile, 20, 0);
-			filesize = (int) strtol(sizeoffile, (char **) NULL, 10); 
-			printf("Size file: %d \n", filesize);
-			if(filesize == 0){
+			numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0);
+			buf[numbytes] = '\0';
+			/*filesize = (int) strtol(sizeoffile, (char **) NULL, 10); 
+			printf("Size file: %d \n", filesize);*/
+			if(strcmp(buf,"no")){
 				printf("File not found");
-				continue;
+				//continue;
 			}
 			else{
-				char *filebuff = calloc(filesize + 1, sizeof(char));
+				/*char *filebuff = calloc(filesize + 1, sizeof(char));
                 sleep(1);
                 numbytes = recv(sockfd, filebuff, filesize, 0); 
-                printf("contents : \n%s", filebuff);
+                printf("contents : \n%s", filebuff);*/
+				
+				printf("Recived\n %s", buf);
 			}
 
 		}
@@ -173,14 +176,14 @@ int main(int argc, char *argv[])
 		memset(inputChar,0,sizeof(inputChar)); // clear string buffer
 		i = 0;
 		
-		if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) 
+		/*if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) 
 			perror("recv");
 
 		buf[numbytes] = '\0';
 
 		#ifdef DEBUG
 		printf("client: received '%s'\n",buf);
-		#endif
+		#endif*/
 	}
 
 	close(sockfd);
