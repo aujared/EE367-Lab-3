@@ -126,20 +126,32 @@ int main(void)
 			close(sockfd); // child doesn't need the listener
 
 			while(1) {
+				printf("DEBUG2\n");
 				if ((numbytes = recv(new_fd, buf, MAXDATASIZE-1, 0)) == -1) 
 					perror("recv");
 
 				buf[numbytes] = '\0';
 
-				if (send(new_fd, buf, MAXDATASIZE-1, 0) == -1)
-					perror("send");
-
-				if(buf[0] == 'q'){
+				//if (send(new_fd, buf, MAXDATASIZE-1, 0) == -1)
+				//	perror("send");
+				printf("RX from client %s %c %d %d\n", buf, buf[0], numbytes,(int)buf[0]);
+				if(buf[0] == 'l') printf("DEBUG1\n");
+				if(!strcmp(buf, "q")){
 					close(new_fd);
 					printf("A child was reaped");
-					exit(0);
-					
+					exit(0);	
 				}
+				if(!strcmp(buf, "l")){
+					    //ls command through child
+					if (fork() == 0) {
+						dup2(new_fd, 1);
+						execl("/usr/bin/ls", "ls", (char *) NULL);
+					}
+
+					wait(NULL);
+					exit(0);
+				}
+				printf("RX from client %s %c %d\n", buf, buf[0], numbytes);
 			}
 		}
 		close(new_fd);  // parent doesn't need this

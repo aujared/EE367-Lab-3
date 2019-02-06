@@ -19,6 +19,7 @@
 #define DEBUG 
 
 void printMenu();
+void printHelpMenu();
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
@@ -94,8 +95,27 @@ int main(int argc, char *argv[])
 			printf("\nI typed %s \n", inputChar);
 		#endif
 
-		if (send(sockfd, inputChar, MAXDATASIZE-1, 0) == -1)
-					perror("send");
+		if(inputChar[0] == 'l' || inputChar[0] == 'L'){
+			if (send(sockfd, "l", MAXDATASIZE-1, 0) == -1)
+				perror("send");
+				
+			if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) 
+				perror("recv");
+			buf[numbytes] = '\0';
+			printf("Recived\n %s", buf);
+
+		}
+		else if(inputChar[0] == 'q' || inputChar[0] == 'Q'){
+			if (send(sockfd, "q", MAXDATASIZE-1, 0) == -1)
+				perror("send");
+			exit(1);
+		}
+		else {
+			printHelpMenu();
+		}
+
+		//if (send(sockfd, inputChar, MAXDATASIZE-1, 0) == -1)
+		//			perror("send");
 
 		memset(inputChar,0,sizeof(inputChar)); // clear string buffer
 		i = 0;
@@ -108,27 +128,32 @@ int main(int argc, char *argv[])
 		#ifdef DEBUG
 		printf("client: received '%s'\n",buf);
 		#endif
-
-		if(strcmp(buf,"q") == 0)	
-			exit(1);
 	}
 
-
-
 	close(sockfd);
-	
-
 	return 0;
 }
 
 void printMenu() {
 	printf("Main Menu\n");
+	printf("ALL COMMAND ARE SINGLE TEXT CHARACTER\n");
 	printf("------------------------------------------------------------------------------\n");
-	printf("l: List: List the contents of the directory of the server\n");
-	printf("c: Check <file name>: Check if the server has the file named <file name>. \n");
-	printf("p: Display <file name>: Check if the server has the file named <file name>.\n");
-	printf("d: Download <file name>: \n");
+	printf("l: List \n");
+	printf("c: Check <file name> \n");
+	printf("p: Display <file name>\n");
+	printf("d: Download <file name>\n");
 	printf("q: Quit\n");
+	printf("h: Help\n");
 	printf("-------------------------------------------------------------------------------\n");
 	printf("Enter command :");
+}
+
+void printHelpMenu() {
+	printf("h: Help: List of all command\n");
+	printf("	l: List: List the contents of the directory of the server\n");
+	printf("	c: Check <file name>: Check if the server has the file named <file name>. \n");
+	printf("	p: Display <file name>: Check if the server has the file named <file name>.\n");
+	printf("	d: Download <file name>: Downloads <file name>.\n");
+	printf("	q: Quit: End program and connection with host\n");
+	printf("	h: Help: Display all available commands\n");
 }
