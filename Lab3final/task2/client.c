@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
 		#ifdef DEBUG
 			printf("\nI typed %s \n", inputChar);
 		#endif
-
+		char filename[MAXDATASIZE];
 		if(inputChar[0] == 'l' || inputChar[0] == 'L'){
 			if (send(sockfd, "l", MAXDATASIZE-1, 0) == -1)
 				perror("send");
@@ -106,17 +106,56 @@ int main(int argc, char *argv[])
 
 		}
 		else if(inputChar[0] == 'c' || inputChar[0] == 'C'){
+			int ack;
 			if (send(sockfd, "c", MAXDATASIZE-1, 0) == -1)
 				perror("send");
+			printf("What file would you like to check for?:\n ");
+			scanf("%s", &filename);
+			while (getchar() != '\n') continue;
+
+			send(sockfd, buf, MAXDATASIZE -1, 0);
+			ack = recv(sockfd, buf, MAXDATASIZE - 1, 0);
+            buf[ack] = '\0';
+
+			if(!strcmp(buf, "yes"))
+				printf("File was found \n");
+
+			else
+				printf("File was not found \n");
+
 		}
 		
 		else if(inputChar[0] == 'p' || inputChar[0] == 'P'){
+			int filesize;
+			char sizeoffile[20] = {0};
+
 			if (send(sockfd, "p", MAXDATASIZE-1, 0) == -1)
 				perror("send");
+
+			printf("What file would you like to print out?:\n ");
+			scanf("%s", &filename);
+			while (getchar() != '\n') continue;
+			send(sockfd, filename, MAXDATASIZE-1,0);
+			numbytes = recv(sockfd, sizeoffile, 20, 0);
+			filesize = (int) strtol(sizeoffile, (char **) NULL, 10); 
+			printf("Size file: %d \n", filesize);
+			if(filesize == 0){
+				printf("File not found");
+				continue;
+			}
+			else{
+				char *filebuff = calloc(filesize + 1, sizeof(char));
+                sleep(1);
+                numbytes = recv(sockfd, filebuff, filesize, 0); 
+                printf("contents : \n%s", filebuff);
+			}
+
 		}
 		else if(inputChar[0] == 'd' || inputChar[0] == 'D'){
 				if (send(sockfd, "d", MAXDATASIZE-1, 0) == -1)
 				perror("send");
+			
+		
 		}
 
 		else if(inputChar[0] == 'q' || inputChar[0] == 'Q'){
