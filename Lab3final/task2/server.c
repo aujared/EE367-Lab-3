@@ -126,7 +126,6 @@ int main(void)
 			close(sockfd); // child doesn't need the listener
 
 			while(1) {
-				printf("DEBUG2\n");
 				if ((numbytes = recv(new_fd, buf, MAXDATASIZE-1, 0)) == -1) 
 					perror("recv");
 
@@ -134,8 +133,7 @@ int main(void)
 
 				//if (send(new_fd, buf, MAXDATASIZE-1, 0) == -1)
 				//	perror("send");
-				printf("RX from client %s %c %d %d\n", buf, buf[0], numbytes,(int)buf[0]);
-				if(buf[0] == 'l') printf("DEBUG1\n");
+
 				if(!strcmp(buf, "q")){
 					close(new_fd);
 					printf("A child was reaped");
@@ -146,11 +144,50 @@ int main(void)
 					if (fork() == 0) {
 						dup2(new_fd, 1);
 						execl("/usr/bin/ls", "ls", (char *) NULL);
+						exit(0);
+					}
+					wait(NULL);
+				}
+				if(!strcmp(buf, "c")) {
+					if ((numbytes = recv(new_fd, buf, MAXDATASIZE-1, 0)) == -1) 
+						perror("recv");
+
+					int result = access(buf, R_OK); //if exist =0, else -1
+
+					if(result == 0) {
+						if (send(new_fd, "yes", MAXDATASIZE-1, 0) == -1)
+							perror("send");
+					}
+					else {
+						if (send(new_fd, "no", MAXDATASIZE-1, 0) == -1)
+							perror("send");
+					}
+				}
+				if(!strcmp(buf, "p")){
+					if ((numbytes = recv(new_fd, buf, MAXDATASIZE-1, 0)) == -1) 
+						perror("recv");
+
+					int result = access(buf, R_OK); //if exist =0, else -1
+
+					if(result == 0) {
+						if (fork() == 0) {
+							dup2(new_fd, 1);
+							execl("/usr/bin/cat", "cat", buf,(char *) NULL);
+							exit(0);
+						}
+						wait(NULL);
+					}
+					else {
+						if (send(new_fd, "no", MAXDATASIZE-1, 0) == -1)
+							perror("send");
 					}
 
-					wait(NULL);
-					exit(0);
 				}
+				if(!strcmp(buf, "d")){
+					 //RX PATH NAME
+					//D COMMANDS DOES NOT WORK
+				}
+
 				printf("RX from client %s %c %d\n", buf, buf[0], numbytes);
 			}
 		}
