@@ -155,6 +155,8 @@ int main(int argc, char *argv[])
 			scanf("%s", &filename);
 			while (getchar() != '\n') continue;
 
+			memset(buf,0,sizeof(buf)); // clear string buffer
+
 			send(sockfd, filename, MAXDATASIZE-1,0);
 			numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0);
 			buf[numbytes] = '\0';
@@ -178,19 +180,34 @@ int main(int argc, char *argv[])
 					char choice[5];
 					printf("File %s exists. Do you want to override? (y/n): ", filename);
 					scanf("%4s", &choice);
-					if(choice[0] == 'n'){
-						fclose(fp);
-						continue;
+				
+					if (choice[0] != 'n')	{
+					//Write file
+						fp = fopen(inputChar, "w");
+						if(NULL == fp){
+							printf("Error Opening File");
+							return 1;
+						}
+						else {
+							//fwrite("bufer", 1, 6, fp);
+							fprintf(fp, buf);
+							
+						}
+					}
 				}
-				//Write file
-				fp = fopen(inputChar, "w");
-				if(NULL == fp){
-					printf("Error Opening File");
-					return 1;
+				else {
+					fp = fopen(inputChar, "w");
+					if (fp == NULL) {
+						printf("Error Opening File");
+						return 1;
+					}
+					else {
+						//fwrite("bufer", 1, 6, fp);
+						fprintf(fp, buf);
+						
+					}
 				}
-				fwrite(buf, 1, sizeof(buf), fp);
 				fclose(fp);
-				}
 			}
 		
 		}

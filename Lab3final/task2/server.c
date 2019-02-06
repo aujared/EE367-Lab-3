@@ -177,7 +177,7 @@ int main(void)
 
 					if(result == 0) {
 					
-						/*fp = fopen(buf, "r");
+						fp = fopen(buf, "r");
 						if (fp == NULL) printf("DEBUG12\n");
 						int i = 0,ch =0;
 						while((ch = fgetc(fp)) != EOF) {
@@ -189,14 +189,14 @@ int main(void)
 
 						printf("buf1: %s\n", buf1);
 						if (send(new_fd, buf1, MAXDATASIZE-1, 0) == -1)
-							perror("send");*/
-						if (fork() == 0) {
+							perror("send");
+						/*if (fork() == 0) {
 							
 							dup2(new_fd, 1);
 							execl("/usr/bin/cat", "cat", buf ,(char *) NULL);
 							exit(0);
-						}
-						//fclose(fp);
+						}*/
+						fclose(fp);
 						
 					}
 					else {
