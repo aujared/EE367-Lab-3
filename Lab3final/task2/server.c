@@ -151,6 +151,34 @@ int main(void)
 					wait(NULL);
 					exit(0);
 				}
+				if(!strcmp(buf, "p")) {
+					//GET PATH NAME
+					int result = access("PATH NAMES GOES HERE", R_OK);
+					if(result == 0) {
+						if (send(new_fd, "File exist", MAXDATASIZE-1, 0) == -1)
+							perror("send");
+					}
+					else {
+						if (send(new_fd, "File does not exist", MAXDATASIZE-1, 0) == -1)
+							perror("send");
+					}
+				}
+				if(!strcmp(buf, "p")){
+					 //RX PATH NAME
+
+					if (fork() == 0) {
+						dup2(new_fd, 1);
+						execl("/usr/bin/cat", "cat", PATHNAME,(char *) NULL);
+					}
+
+					wait(NULL);
+					exit(0);
+				}
+				if(!strcmp(buf, "d")){
+					 //RX PATH NAME
+					//D COMMANDS DOES NOT WORK
+				}
+
 				printf("RX from client %s %c %d\n", buf, buf[0], numbytes);
 			}
 		}
