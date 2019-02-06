@@ -105,6 +105,20 @@ int main(int argc, char *argv[])
 			printf("Recived\n %s", buf);
 
 		}
+		else if(inputChar[0] == 'c' || inputChar[0] == 'C'){
+			if (send(sockfd, "c", MAXDATASIZE-1, 0) == -1)
+				perror("send");
+		}
+		
+		else if(inputChar[0] == 'p' || inputChar[0] == 'P'){
+			if (send(sockfd, "p", MAXDATASIZE-1, 0) == -1)
+				perror("send");
+		}
+		else if(inputChar[0] == 'd' || inputChar[0] == 'D'){
+				if (send(sockfd, "d", MAXDATASIZE-1, 0) == -1)
+				perror("send");
+		}
+
 		else if(inputChar[0] == 'q' || inputChar[0] == 'Q'){
 			if (send(sockfd, "q", MAXDATASIZE-1, 0) == -1)
 				perror("send");
