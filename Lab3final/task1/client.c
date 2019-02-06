@@ -15,8 +15,10 @@
 #include <arpa/inet.h>
 
 #define PORT "3500" // the port client will be connecting to 
+#define MAXDATASIZE 100 // max number of bytes we can get at once
+#define DEBUG 
 
-#define MAXDATASIZE 100 // max number of bytes we can get at once 
+void printMenu();
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
@@ -79,6 +81,8 @@ int main(int argc, char *argv[])
 	freeaddrinfo(servinfo); // all done with this structure
 
 	while(1) {
+		printMenu();
+
 		int i = 0,c =0;
 		while ((c = getchar()) != '\n' && c != EOF) {
 			inputChar[i] = c;
@@ -86,7 +90,9 @@ int main(int argc, char *argv[])
     	}// Getinput from user
 		inputChar[i] = '\0';
 
-		printf("\nI typed %s \n", inputChar);
+		#ifdef DEBUG
+			printf("\nI typed %s \n", inputChar);
+		#endif
 
 		if (send(sockfd, inputChar, MAXDATASIZE-1, 0) == -1)
 					perror("send");
@@ -98,7 +104,10 @@ int main(int argc, char *argv[])
 			perror("recv");
 
 		buf[numbytes] = '\0';
+
+		#ifdef DEBUG
 		printf("client: received '%s'\n",buf);
+		#endif
 
 		if(strcmp(buf,"q") == 0)	
 			exit(1);
@@ -112,3 +121,14 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
+void printMenu() {
+	printf("Main Menu\n");
+	printf("------------------------------------------------------------------------------\n");
+	printf("l: List: List the contents of the directory of the server\n");
+	printf("c: Check <file name>: Check if the server has the file named <file name>. \n");
+	printf("p: Display <file name>: Check if the server has the file named <file name>.\n");
+	printf("d: Download <file name>: \n");
+	printf("q: Quit\n");
+	printf("-------------------------------------------------------------------------------\n");
+	printf("Enter command :");
+}

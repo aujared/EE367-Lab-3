@@ -15,10 +15,11 @@
 #include <sys/wait.h>
 #include <signal.h>
 
-#define PORT "3501"  // the port users will be connecting to
-#define MAXDATASIZE 100 // max number of bytes we can get at once 
+#define PORT "3500"  // the port users will be connecting to
+
 #define BACKLOG 10	 // how many pending connections queue will hold
-#define DEBUG
+#define MAXDATASIZE 100 // max number of bytes we can get at once 
+
 void sigchld_handler(int s)
 {
 	(void)s; // quiet unused variable warning
@@ -50,8 +51,8 @@ int main(void)
 	socklen_t sin_size;
 	struct sigaction sa;
 	int yes=1;
-	char s[INET6_ADDRSTRLEN];
-	int rv;
+	char s[INET6_ADDRSTRLEN] ,buf[MAXDATASIZE];
+	int rv, numbytes;
 
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;
@@ -124,76 +125,23 @@ int main(void)
 		if (!fork()) { // this is the child process
 			close(sockfd); // child doesn't need the listener
 
-			char buf[MAXDATASIZE];
-			int numbytes = 0;
-
 			while(1) {
-				if ((numbytes = recv(new_fd, buf, MAXDATASIZE-1, 0)) == -1) {
+				if ((numbytes = recv(new_fd, buf, MAXDATASIZE-1, 0)) == -1) 
 					perror("recv");
-					exit(1);
-				}// RX from client
+
 				buf[numbytes] = '\0';
 
-				if (send(new_fd, buf, MAXDATASIZE -1, 0) == -1)
-					perror("send"); //Repeat what client typed
-				
-				#if defined DEBUG
-        		printf("\nDEBUG: I recieved string from client: %s\n", buf);
-    			#endif
-				for(int c = 0 ; c < sizeof(buf); c++){
-					printf("DEBUG : %c", buf[c]);
-				}
+				if (send(new_fd, buf, MAXDATASIZE-1, 0) == -1)
+					perror("send");
 
-				//close(new_fd);	Don't close connection yet
-				if (strncmp(buf,"q",1) == 0){
-					if (send(new_fd, "q" ,1, 0) == -1) {
-						perror("send"); //Repeat what client typed
-					}
-					printf("child was reaped\n");
-					exit(0);
+				if(buf[0] == 'q'){
 					close(new_fd);
-				} 
-				if (strncmp(buf,"l",1) == 0){
-					//Client want a "ls" of server
-					int fds[2], n;
-					char buf1[MAXDATASIZE];
-
-					#if defined DEBUG
-						printf("DEBUG: LS COMMAND WAS CALLED");
-					#endif
-
-					/*pipe(fds); //Open a pipe
-					dup2(fds[1], STDOUT_FILENO);//Copy output to pipe
-					execl("/usr/bin/ls", "ls", NULL);
-
-					if(( n = read(fds[0],buf1,MAXDATASIZE)) >= 0) {
-						buf1[n] = '\0';
-					}
-					else {
-						buf1[0] = '\0';
-					}
-
-					if (send(new_fd, buf1, MAXDATASIZE -1, 0) == -1) {
-						perror("send"); //send result t oclient
-					}*/
+					printf("A child was reaped");
+					exit(0);
+					
 				}
-				else if (strcmp(buf,"p") == 0) {
-					//find file
-				}
-				else if (strcmp(buf," d") == 0) {
-					//Download file
-				}
-				else{
-					//send help list
-					#if defined DEBUG
-						printf("DEBUG: HELP COMMAND WAS CALLED");
-					#endif
-				}
-				memset(buf,0,sizeof(buf)); // clear string buffer
 			}
 		}
-		
-
 		close(new_fd);  // parent doesn't need this
 	}
 
