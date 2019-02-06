@@ -14,7 +14,7 @@
 
 #include <arpa/inet.h>
 
-#define PORT "3500" // the port client will be connecting to 
+#define PORT "3501" // the port client will be connecting to 
 
 #define MAXDATASIZE 100 // max number of bytes we can get at once 
 
@@ -79,13 +79,16 @@ int main(int argc, char *argv[])
 	freeaddrinfo(servinfo); // all done with this structure
 
 	while(1) {
+
 		int i = 0,c =0;
 		while ((c = getchar()) != '\n' && c != EOF) {
 			inputChar[i] = c;
 			i++;
     	}// Getinput from user
+		
+		inputChar[i] = '\0';
 
-		printf("\nI typed %s \n", inputChar);
+		printf("\nI typed :%sxxx \n", inputChar);
 		if (send(sockfd, inputChar, MAXDATASIZE-1, 0) == -1)
 					perror("send");
 

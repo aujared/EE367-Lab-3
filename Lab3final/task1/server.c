@@ -136,7 +136,9 @@ int main(void)
 
 				if(buf[0] == 'q'){
 					close(new_fd);
+					printf("A child was reaped");
 					exit(0);
+					
 				}
 			}
 		}
