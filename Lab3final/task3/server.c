@@ -18,7 +18,7 @@
 #define PORT "3500"  // the port users will be connecting to
 
 #define BACKLOG 10	 // how many pending connections queue will hold
-#define MAXDATASIZE 100 // max number of bytes we can get at once 
+#define MAXDATASIZE 1000 // max number of bytes we can get at once 
 
 void sigchld_handler(int s)
 {
